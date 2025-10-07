@@ -1,19 +1,33 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Container, Form, Button, Row, Col } from 'react-bootstrap';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import Input from '../../components/UI/Input';
-import { login } from '../../app/store/authSlice';
+import { loginUserWithCredentials } from '../../app/store/authSlice';
 
 export default function Signin() {
+  const loadingState = useSelector((state) => state.auth.loading);
+  const token = useSelector((state) => state.auth.token);
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const dispatch = useDispatch();
 
   function loginUser(e) {
     e.preventDefault();
-    dispatch(login({ email, password }));
+    dispatch(loginUserWithCredentials({ email, password }));
   }
+
+  if (loadingState === 'pending') {
+    return <div>Loading...</div>;
+  }
+
+  useEffect(() => {
+    if (loadingState !== 'failed' && token) {
+      navigate('/');
+    }
+  }, [token, navigate, loadingState]);
 
   return (
     <Layout>
