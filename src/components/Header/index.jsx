@@ -2,9 +2,14 @@ import { NavLink, Link } from 'react-router-dom';
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
-// import NavDropdown from 'react-bootstrap/NavDropdown';
+import Button from 'react-bootstrap/Button';
+import { useSelector, useDispatch } from 'react-redux';
+import { logout } from '../../app/store/authSlice';
 
 export default function Header() {
+  const isUserLoggedIn = !!useSelector((state) => state.auth.token);
+  const dispatch = useDispatch();
+
   return (
     <Navbar collapseOnSelect expand="lg" variant="dark" bg="dark">
       <Container>
@@ -28,9 +33,15 @@ export default function Header() {
           </Nav>
           <Nav>
             <li className="nav-item">
-              <NavLink to="/signin" className="nav-link">
-                Signin
-              </NavLink>
+              {isUserLoggedIn ? (
+                <Button className="nav-link" onClick={() => dispatch(logout())}>
+                  Signout
+                </Button>
+              ) : (
+                <NavLink to="/signin" className="nav-link">
+                  Signin
+                </NavLink>
+              )}
             </li>
             <li className="nav-item">
               <NavLink to="/signup" className="nav-link">

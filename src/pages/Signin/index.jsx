@@ -19,15 +19,15 @@ export default function Signin() {
     dispatch(loginUserWithCredentials({ email, password }));
   }
 
-  if (loadingState === 'pending') {
-    return <div>Loading...</div>;
-  }
-
   useEffect(() => {
     if (loadingState !== 'failed' && token) {
       navigate('/');
     }
   }, [token, navigate, loadingState]);
+
+  if (loadingState === 'pending') {
+    return <div>Loading...</div>;
+  }
 
   return (
     <Layout>
