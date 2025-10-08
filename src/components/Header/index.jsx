@@ -32,22 +32,24 @@ export default function Header() {
             </NavDropdown> */}
           </Nav>
           <Nav>
-            <li className="nav-item">
-              {isUserLoggedIn ? (
-                <Button className="nav-link" onClick={() => dispatch(logout())}>
+            {isUserLoggedIn ? (
+              <li className="nav-item">
+                <Button variant="dark" onClick={() => dispatch(logout())}>
                   Signout
                 </Button>
-              ) : (
+              </li>
+            ) : (
+              <>
                 <NavLink to="/signin" className="nav-link">
                   Signin
                 </NavLink>
-              )}
-            </li>
-            <li className="nav-item">
-              <NavLink to="/signup" className="nav-link">
-                Signup
-              </NavLink>
-            </li>
+                <li className="nav-item">
+                  <NavLink to="/signup" className="nav-link">
+                    Signup
+                  </NavLink>
+                </li>
+              </>
+            )}
           </Nav>
         </Navbar.Collapse>
       </Container>
