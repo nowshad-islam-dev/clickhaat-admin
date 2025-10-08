@@ -2,8 +2,8 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { apiBaseUrl } from '../../../config/index';
 
-const authAxiosInstance = axios.create({
-  baseURL: apiBaseUrl,
+export const authAxiosInstance = axios.create({
+  baseURL: `${apiBaseUrl}/auth/admin`,
 });
 
 // loading --->>> 'idle' | 'pending' | 'succeeded' | 'failed'
@@ -17,7 +17,7 @@ const initialState = {
 export const loginUserWithCredentials = createAsyncThunk(
   'auth/loginUser',
   async (credentials, _thunkApi) => {
-    const res = await authAxiosInstance.post('/auth/admin/signin', credentials);
+    const res = await authAxiosInstance.post('/signin', credentials);
     return res.data;
   }
 );
