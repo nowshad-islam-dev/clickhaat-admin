@@ -1,17 +1,18 @@
 import axios from 'axios';
 import { apiBaseUrl } from '../config';
-import { logout } from '../app/store/authSlice';
-import store from '../app/store';
 
+const token = localStorage.getItem('click_haat_token');
 const axiosInstance = axios.create({
   baseURL: apiBaseUrl,
+  headers: { Authorization: `Bearer ${token}` },
 });
 
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status == 401) {
-      store.dispatch(logout());
+      // Clear site data from local storage
+      localStorage.clear();
       window.location.href('/signin');
     }
     return Promise.reject(error);
