@@ -4,6 +4,9 @@ import Home from './pages/Home';
 import Signin from './pages/Signin';
 import Signup from './pages/Signup';
 import PrivateRoute from './HOC/PrivateRoute';
+import Product from './pages/Product';
+import Order from './pages/Order';
+import Category from './pages/Category';
 function App() {
   return (
     <>
@@ -13,6 +16,9 @@ function App() {
             {/* Protected Routes */}
             <Route element={<PrivateRoute />}>
               <Route path="/" element={<Home />} />
+              <Route path="/product" element={<Product />} />
+              <Route path="/order" element={<Order />} />
+              <Route path="/category" element={<Category />} />
             </Route>
 
             <Route path="/signin" element={<Signin />} />
