@@ -1,25 +1,25 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Container, Row, Col, Button, Modal } from 'react-bootstrap';
-import Layout from '../../components/Layout';
-import Input from '../../components/UI/Input';
-import { getCategories } from '../../app/store/categorySlice';
+import { Row, Col, Button, Modal, Form } from 'react-bootstrap';
+import Layout from '@/components/Layout';
+import Input from '@/components/UI/Input';
+import { getCategories } from '@/app/store/categorySlice';
+import axiosInstance from '@/axios/axiosInstance';
 
 export default function Category() {
-  const [show, setShow] = useState(false);
-  const [categoryName, setCategoryName] = '';
   const { loading, category } = useSelector((state) => state.category);
   const dispatch = useDispatch();
+
+  const [show, setShow] = useState(false);
+  const [categoryName, setCategoryName] = useState('');
+  const [parentId, setParentId] = useState('');
+  const [categoryImage, setCategoryImage] = useState(undefined);
 
   useEffect(() => {
     if (loading === 'idle') {
       dispatch(getCategories());
     }
   }, [loading, dispatch]);
-
-  if (loading === 'pending') {
-    return <div>Loading....</div>;
-  }
 
   const renderCategories = (category) => (
     <ul>
@@ -32,36 +32,116 @@ export default function Category() {
     </ul>
   );
 
+  const extractCategories = (category, result = []) => {
+    for (let cat of category) {
+      result.push({ id: cat.id, name: cat.name });
+      if (cat.children?.length > 0) {
+        extractCategories(cat.children, result);
+      }
+    }
+
+    return result;
+  };
+
+  const categoryOptions = useMemo(
+    () => extractCategories(category),
+    [category]
+  );
+
+  function handleClose() {
+    setShow(false);
+    setCategoryName('');
+    setParentId('');
+    setCategoryImage(undefined);
+  }
+
+  function handleCategoryImage(e) {
+    setCategoryImage(e.target.files[0]);
+  }
+
+  async function createCategory(e) {
+    e.preventDefault();
+    if (!categoryName.trim()) {
+      return;
+    }
+
+    const form = new FormData();
+    form.append('name', categoryName);
+    if (parentId) form.append('parentId', parentId);
+    if (categoryImage) form.append('image', categoryImage);
+
+    const res = await axiosInstance.post('/category/create', form);
+    handleClose();
+    if (res.status === 201) {
+      dispatch(getCategories());
+    }
+  }
+
+  if (loading === 'pending') {
+    return <div>Loading....</div>;
+  }
+
   return (
     <Layout>
       <Row>
         <Col md={12}>
-          <div className="d-md-flex w-100 p-2 justify-content-between">
+          <div className='d-md-flex w-100 p-2 justify-content-between'>
             <h2>Category</h2>
-            <Button variant="dark" onClick={() => setShow(true)}>
+            <Button variant='dark' onClick={() => setShow(true)}>
               Add Category
             </Button>
           </div>
 
-          <Modal show={show} onHide={() => setShow(false)}>
+          <Modal show={show} onHide={handleClose}>
             <Modal.Header closeButton>
               <Modal.Title>Add a new category:</Modal.Title>
             </Modal.Header>
+
             <Modal.Body>
               <Input
-                type="text"
-                placeholder="Category Name"
+                type='text'
+                placeholder='Category Name'
                 value={categoryName}
                 onChange={(e) => {
                   setCategoryName(e.target.value);
                 }}
               />
+
+              {/* Select parent ID for new  category */}
+              <Form.Select
+                name='parentId'
+                className='form-control'
+                value={parentId}
+                onChange={(e) => setParentId(e.target.value)}
+              >
+                <option value='' disabled>
+                  Select parent category (optional)
+                </option>
+
+                {categoryOptions.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </Form.Select>
+
+              <Form.Label htmlFor='categoryImage' className='my-2'>
+                Category Image
+              </Form.Label>
+              <br />
+              <Form.Control
+                type='file'
+                name='categoryImage'
+                id='categoryImage'
+                onChange={handleCategoryImage}
+              />
             </Modal.Body>
+
             <Modal.Footer>
-              <Button variant="secondary" onClick={() => setShow(false)}>
+              <Button variant='secondary' onClick={() => setShow(false)}>
                 Cancel
               </Button>
-              <Button variant="primary" onClick={() => setShow(false)}>
+              <Button variant='primary' onClick={createCategory}>
                 Add
               </Button>
             </Modal.Footer>
