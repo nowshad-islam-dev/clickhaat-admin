@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { Container, Form, Button, Row, Col } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import Layout from '../../components/Layout';
-import Input from '../../components/UI/Input';
-import { loginUserWithCredentials } from '../../app/store/authSlice';
+import Header from '@/components/Header';
+import Input from '@/components/UI/Input';
+import { loginUserWithCredentials } from '@/app/store/authSlice';
 
 export default function Signin() {
   const loadingState = useSelector((state) => state.auth.loading);
@@ -30,7 +30,9 @@ export default function Signin() {
   }
 
   return (
-    <Layout>
+    <>
+      <Header />
+
       <Container>
         <Row style={{ marginTop: '60px' }}>
           <Col md={{ span: 6, offset: 3 }}>
@@ -39,30 +41,30 @@ export default function Signin() {
                 Sign in as Admin
               </h3>
               <Input
-                type="email"
-                label="Email"
-                placeholder="Email"
+                type='email'
+                label='Email'
+                placeholder='Email'
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
                 }}
               />
               <Input
-                type="password"
-                label="Password"
-                placeholder="Password"
+                type='password'
+                label='Password'
+                placeholder='Password'
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);
                 }}
               />
-              <Button variant="primary" type="submit">
+              <Button variant='primary' type='submit'>
                 Signin
               </Button>
             </Form>
           </Col>
         </Row>
       </Container>
-    </Layout>
+    </>
   );
 }
