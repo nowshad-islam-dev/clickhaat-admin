@@ -30,6 +30,9 @@ export default function Sidebar({ children }) {
             <NavLink to="/order" className="nav-link">
               Orders
             </NavLink>
+            <NavLink to="/category" className="nav-link">
+              Categories
+            </NavLink>
           </Nav>
         </Col>
 
