@@ -1,17 +1,18 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axiosInstance from '../../../axios/axiosInstance';
+import axiosInstance from '@/axios/axiosInstance';
 
 // loading --->>> 'idle' | 'pending' | 'succeeded' | 'failed'
 
 const initialState = {
   category: [],
   loading: 'idle',
+  error: '',
 };
 
 export const getCategories = createAsyncThunk(
   'category/getCategories',
   async () => {
-    const res = await axiosInstance('/category/all');
+    const res = await axiosInstance.get('/category/all');
     return res.data.categoryList;
   }
 );
@@ -29,10 +30,12 @@ const categorySlice = createSlice({
       .addCase(getCategories.fulfilled, (state, action) => {
         state.category = action.payload;
         state.loading = 'succeeded';
+        state.error = '';
       })
       .addCase(getCategories.rejected, (state) => {
         state.category = [];
         state.loading = 'failed';
+        state.error = 'Error fetching categories.';
       });
   },
 });
