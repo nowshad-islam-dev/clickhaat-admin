@@ -1,13 +1,10 @@
-import Layout from '../../components/Layout';
 import { Container } from 'react-bootstrap';
+import Layout from '../../components/Layout';
 
 export default function Home() {
   return (
     <Layout>
-      <Container
-        style={{ margin: '5rem', background: '#fff' }}
-        className="text-center"
-      >
+      <Container style={{ background: '#fff' }} className="text-center">
         <h1>Welcome to Admin Dashboard</h1>
         <p>
           lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus
