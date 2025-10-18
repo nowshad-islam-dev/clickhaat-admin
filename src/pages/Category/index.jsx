@@ -1,15 +1,15 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Row, Col, Button, Modal, Form } from 'react-bootstrap';
 import Layout from '@/components/Layout';
 import Input from '@/components/UI/Input';
 import { getCategories } from '@/app/store/categorySlice';
 import axiosInstance from '@/axios/axiosInstance';
+import CategoryOptions from '@/components/Category/ExtractCategory';
 
 export default function Category() {
   const { loading, category } = useSelector((state) => state.category);
   const dispatch = useDispatch();
-
   const [show, setShow] = useState(false);
   const [categoryName, setCategoryName] = useState('');
   const [parentId, setParentId] = useState('');
@@ -32,22 +32,6 @@ export default function Category() {
     </ul>
   );
 
-  const extractCategories = (category, result = []) => {
-    for (let cat of category) {
-      result.push({ id: cat.id, name: cat.name });
-      if (cat.children?.length > 0) {
-        extractCategories(cat.children, result);
-      }
-    }
-
-    return result;
-  };
-
-  const categoryOptions = useMemo(
-    () => extractCategories(category),
-    [category]
-  );
-
   function handleClose() {
     setShow(false);
     setCategoryName('');
@@ -62,6 +46,7 @@ export default function Category() {
   async function createCategory(e) {
     e.preventDefault();
     if (!categoryName.trim()) {
+      console.error('Category: Lacks required information.');
       return;
     }
 
@@ -71,8 +56,9 @@ export default function Category() {
     if (categoryImage) form.append('image', categoryImage);
 
     const res = await axiosInstance.post('/category/create', form);
-    handleClose();
+    console.log(res.data);
     if (res.status === 201) {
+      handleClose();
       dispatch(getCategories());
     }
   }
@@ -97,54 +83,48 @@ export default function Category() {
               <Modal.Title>Add a new category:</Modal.Title>
             </Modal.Header>
 
-            <Modal.Body>
-              <Input
-                type='text'
-                placeholder='Category Name'
-                value={categoryName}
-                onChange={(e) => {
-                  setCategoryName(e.target.value);
-                }}
-              />
+            <Form onSubmit={createCategory}>
+              <Modal.Body>
+                <Input
+                  type='text'
+                  placeholder='Category Name'
+                  value={categoryName}
+                  onChange={(e) => {
+                    setCategoryName(e.target.value);
+                  }}
+                />
 
-              {/* Select parent ID for new  category */}
-              <Form.Select
-                name='parentId'
-                className='form-control'
-                value={parentId}
-                onChange={(e) => setParentId(e.target.value)}
-              >
-                <option value='' disabled>
-                  Select parent category (optional)
-                </option>
+                {/* Select parent ID for new  category */}
+                <Form.Select
+                  name='parentId'
+                  className='form-control'
+                  value={parentId}
+                  onChange={(e) => setParentId(e.target.value)}
+                >
+                  <CategoryOptions />
+                </Form.Select>
 
-                {categoryOptions.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </Form.Select>
+                <Form.Label htmlFor='categoryImage' className='my-2'>
+                  Category Image
+                </Form.Label>
+                <br />
+                <Form.Control
+                  type='file'
+                  name='categoryImage'
+                  id='categoryImage'
+                  onChange={handleCategoryImage}
+                />
+              </Modal.Body>
 
-              <Form.Label htmlFor='categoryImage' className='my-2'>
-                Category Image
-              </Form.Label>
-              <br />
-              <Form.Control
-                type='file'
-                name='categoryImage'
-                id='categoryImage'
-                onChange={handleCategoryImage}
-              />
-            </Modal.Body>
-
-            <Modal.Footer>
-              <Button variant='secondary' onClick={() => setShow(false)}>
-                Cancel
-              </Button>
-              <Button variant='primary' onClick={createCategory}>
-                Add
-              </Button>
-            </Modal.Footer>
+              <Modal.Footer>
+                <Button variant='secondary' onClick={() => setShow(false)}>
+                  Cancel
+                </Button>
+                <Button type='submit' variant='primary'>
+                  Add
+                </Button>
+              </Modal.Footer>
+            </Form>
           </Modal>
         </Col>
       </Row>
