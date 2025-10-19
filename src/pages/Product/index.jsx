@@ -4,6 +4,7 @@ import Layout from '@/components/Layout';
 import Input from '@/components/UI/Input';
 import CategoryOptions from '@/components/Category/ExtractCategory';
 import axiosInstance from '@/axios/axiosInstance';
+import ProductTable from '@/components/Product/ProductTable';
 
 export default function Product() {
   const [name, setName] = useState('');
@@ -147,6 +148,11 @@ export default function Product() {
               </Modal.Footer>
             </Form>
           </Modal>
+        </Col>
+      </Row>
+      <Row>
+        <Col>
+          <ProductTable />
         </Col>
       </Row>
     </Layout>
