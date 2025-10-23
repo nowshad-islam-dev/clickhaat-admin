@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { apiBaseUrl } from '../config';
+import { apiBaseUrl } from '@/config';
 
 const token = localStorage.getItem('click_haat_token');
 const axiosInstance = axios.create({
@@ -13,7 +13,7 @@ axiosInstance.interceptors.response.use(
     if (error.response?.status == 401) {
       // Clear site data from local storage
       localStorage.clear();
-      window.location.href('/signin');
+      window.location.href = '/signin';
     }
     return Promise.reject(error);
   }
