@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Table, Container, Pagination } from 'react-bootstrap';
 import { useSelector, useDispatch } from 'react-redux';
+import { SquarePen, Eye } from 'lucide-react';
 import { getProducts } from '@/app/store/productSlice';
+import ProductDetails from './ProductDetails';
 
 export default function ProductTable() {
   const dispatch = useDispatch();
@@ -10,6 +12,9 @@ export default function ProductTable() {
     (state) => state.product.pagination
   );
 
+  const [showProductDetail, setShowProductDetail] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [modalMode, setModalMode] = useState('view'); // view or edit
   const [currentPage, setCurrentPage] = useState(page || 1);
   const totalPage = total > 0 ? Math.ceil(total / limit) : 0;
 
@@ -31,6 +36,18 @@ export default function ProductTable() {
     if (currentPage < totalPage) setCurrentPage((prev) => prev + 1);
   };
 
+  const handleOpenModal = (product, mode) => {
+    setSelectedProduct(product);
+    setModalMode(mode);
+    setShowProductDetail(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowProductDetail(false);
+    setSelectedProduct(null);
+    setModalMode('view');
+  };
+
   if (loading === 'pending') return <div>Loading....</div>;
 
   return (
@@ -39,10 +56,11 @@ export default function ProductTable() {
         <thead>
           <tr>
             <th>Name</th>
-            <th>Price</th>
+            <th>Price($)</th>
             <th>Quantity</th>
             <th>Category</th>
             <th>Offer</th>
+            <th>View/Edit</th>
           </tr>
         </thead>
         <tbody>
@@ -55,11 +73,37 @@ export default function ProductTable() {
                 <td>{p.quantity}</td>
                 <td>{p.category.name}</td>
                 <td>{p.offer}</td>
+                <td>
+                  <SquarePen
+                    size={18}
+                    color='#555'
+                    className='mx-2'
+                    role='button'
+                    onClick={() => handleOpenModal(p, 'edit')}
+                  />
+                  <Eye
+                    size={18}
+                    color='#555'
+                    className='mx-2'
+                    role='button'
+                    onClick={() => handleOpenModal(p, 'view')}
+                  />
+                </td>
               </tr>
             );
           })}
         </tbody>
       </Table>
+
+      {/* Product Details Modal */}
+      {selectedProduct && (
+        <ProductDetails
+          show={showProductDetail}
+          product={selectedProduct}
+          mode={modalMode}
+          onClose={handleCloseModal}
+        />
+      )}
 
       {/* Pagination */}
       <Pagination className='justify-content-center mt-3'>
