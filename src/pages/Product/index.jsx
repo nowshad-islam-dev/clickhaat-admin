@@ -1,10 +1,20 @@
 import { useState } from 'react';
-import { Row, Col, Button, Modal, Form, Container } from 'react-bootstrap';
+import {
+  Row,
+  Col,
+  Button,
+  Modal,
+  Form,
+  Container,
+  InputGroup,
+  Image,
+} from 'react-bootstrap';
 import Layout from '@/components/Layout';
-import Input from '@/components/UI/Input';
 import CategoryOptions from '@/components/Category/ExtractCategory';
 import axiosInstance from '@/axios/axiosInstance';
 import ProductTable from '@/components/Product/ProductTable';
+import { X } from 'lucide-react';
+import './style.css';
 
 export default function Product() {
   const [name, setName] = useState('');
@@ -29,8 +39,28 @@ export default function Product() {
 
   function handleProductImage(e) {
     const files = Array.from(e.target.files);
-    setProductImages((prev) => [...prev, ...files]);
+
+    // Maximum 5 images can belong to a product
+    if (productImages.length + files.length > 5) {
+      alert('Limit exceeded.');
+      return;
+    }
+
+    const newImages = files.map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+      name: file.name,
+    }));
+
+    setProductImages((prev) => [...prev, ...newImages]);
   }
+
+  const handleRemoveImage = (idx) => {
+    setProductImages((prev) => {
+      URL.revokeObjectURL(prev[idx].preview);
+      return prev.filter((_, i) => i !== idx);
+    });
+  };
 
   async function createProduct(e) {
     e.preventDefault();
@@ -47,8 +77,8 @@ export default function Product() {
     if (price) form.append('price', price);
     if (quantity) form.append('quantity', quantity);
     if (offer) form.append('offer', offer);
-    productImages.forEach((img) => {
-      form.append('picture', img);
+    productImages.forEach((imgObj) => {
+      form.append('picture', imgObj.file);
     });
 
     const res = await axiosInstance.post('/product/create', form);
@@ -69,73 +99,148 @@ export default function Product() {
             </Button>
           </div>
 
-          <Modal show={show} onHide={handleClose}>
+          <Modal show={show} onHide={handleClose} size='lg' centered>
             <Modal.Header closeButton>
-              <Modal.Title>Add a new product:</Modal.Title>
+              <Modal.Title>Add New Product</Modal.Title>
             </Modal.Header>
 
             <Form onSubmit={createProduct} encType='multipart/form-data'>
               <Modal.Body>
-                <Input
-                  type='text'
-                  placeholder='Product Name'
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
+                <Form.Group className='mb-3'>
+                  <Form.Label className='fw-semibold'>Name</Form.Label>
+                  <Form.Control
+                    type='text'
+                    name='name'
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder='Enter product name'
+                  />
+                </Form.Group>
 
-                <Input
-                  type='number'
-                  placeholder='Product Price'
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                />
+                <Row>
+                  <Col md='6'>
+                    <Form.Group className='mb-3'>
+                      <Form.Label className='fw-semibold'>Price</Form.Label>
+                      <InputGroup>
+                        <InputGroup.Text>$</InputGroup.Text>
+                        <Form.Control
+                          type='number'
+                          name='price'
+                          value={price}
+                          min='0'
+                          step='0.01'
+                          onChange={(e) => setPrice(e.target.value)}
+                          placeholder='0.00'
+                        />
+                      </InputGroup>
+                    </Form.Group>
+                  </Col>
+                  <Col>
+                    <Form.Group className='mb-3'>
+                      <Form.Label className='fw-semibold'>Offer</Form.Label>
+                      <InputGroup>
+                        <Form.Control
+                          type='number'
+                          name='offer'
+                          value={offer}
+                          onChange={(e) => setOffer(e.target.value)}
+                          min='0'
+                          max='100'
+                          placeholder='0'
+                        />
+                        <InputGroup.Text>%</InputGroup.Text>
+                      </InputGroup>
+                    </Form.Group>
+                  </Col>
+                </Row>
 
-                <Input
-                  type='number'
-                  placeholder='Product Quantity'
-                  value={quantity}
-                  onChange={(e) => setQuantity(e.target.value)}
-                />
+                <Row>
+                  <Col md='5'>
+                    <Form.Group className='mb-3'>
+                      <Form.Label className='fw-semibold'>Quantity</Form.Label>
+                      <Form.Control
+                        type='number'
+                        name='quantity'
+                        value={quantity}
+                        onChange={(e) => setQuantity(e.target.value)}
+                        min='0'
+                        placeholder='Quantity'
+                      />
+                    </Form.Group>
+                  </Col>
 
-                <Input
-                  type='textarea'
-                  placeholder='Product Description'
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                />
+                  <Col>
+                    <Form.Group>
+                      <Form.Label className='fw-semibold'>Category</Form.Label>
+                      <Form.Select
+                        name='category'
+                        className='form-control'
+                        value={categoryId}
+                        onChange={(e) => setCategoryId(e.target.value)}
+                      >
+                        <CategoryOptions />
+                      </Form.Select>
+                    </Form.Group>
+                  </Col>
+                </Row>
 
-                <Input
-                  type='number'
-                  placeholder='Discount Offer'
-                  value={offer}
-                  onChange={(e) => setOffer(e.target.value)}
-                />
+                <Form.Group className='mb-3'>
+                  <Form.Label className='fw-semibold'>Description</Form.Label>
+                  <Form.Control
+                    as='textarea'
+                    name='description'
+                    rows='4'
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder='Write a short description...'
+                  />
+                </Form.Group>
 
-                <Form.Select
-                  name='picture'
-                  className='form-control'
-                  value={categoryId}
-                  onChange={(e) => setCategoryId(e.target.value)}
-                >
-                  <CategoryOptions />
-                </Form.Select>
+                <Form.Group>
+                  <Form.Label className='mt-1 fw-semibold'>
+                    Product Images
+                  </Form.Label>
+                  <Form.Control
+                    type='file'
+                    multiple
+                    accept='image/*'
+                    name='categoryImage'
+                    onChange={handleProductImage}
+                    disabled={productImages.length >= 5}
+                  />
 
-                <Form.Label htmlFor='categoryImage' className='mt-1'>
-                  Product Images
-                </Form.Label>
-                <Container>
-                  {productImages.length > 0
-                    ? productImages.map((pic, idx) => (
-                        <div key={idx}>{pic.name}</div>
-                      ))
-                    : null}
-                </Container>
-                <Form.Control
-                  type='file'
-                  name='categoryImage'
-                  id='categoryImage'
-                  onChange={handleProductImage}
-                />
+                  {productImages.length > 0 && (
+                    <Container className='mt-3'>
+                      <div className='d-flex gap-3 image-container justify-content-center'>
+                        {productImages.map((img, idx) => (
+                          <div key={idx} className='border '>
+                            <div className='position-relative border rounded image-wrapper'>
+                              <Image
+                                src={img.preview}
+                                alt={img.name}
+                                fluid
+                                className='preview-image'
+                              />
+                              <Button
+                                variant='danger'
+                                size='sm'
+                                className='remove-btn position-absolute top-0 end-0 py-0 rounded-circle'
+                                onClick={() => handleRemoveImage(idx)}
+                              >
+                                {X}
+                              </Button>
+                            </div>
+                            <div className='text-truncate small mt-1'>
+                              {img.name?.length <= 18
+                                ? img.name
+                                : `${img.name.slice(0, 15)}...`}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </Container>
+                  )}
+                </Form.Group>
               </Modal.Body>
 
               <Modal.Footer>
@@ -143,7 +248,7 @@ export default function Product() {
                   Cancel
                 </Button>
                 <Button type='submit' variant='primary'>
-                  Add
+                  Save Changes
                 </Button>
               </Modal.Footer>
             </Form>
