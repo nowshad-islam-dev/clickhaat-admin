@@ -1,11 +1,19 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Row, Col, Button, Modal, Form } from 'react-bootstrap';
+import {
+  Row,
+  Col,
+  Button,
+  Modal,
+  Form,
+  Container,
+  Image,
+} from 'react-bootstrap';
 import Layout from '@/components/Layout';
-import Input from '@/components/UI/Input';
 import { getCategories } from '@/app/store/categorySlice';
 import axiosInstance from '@/axios/axiosInstance';
 import CategoryOptions from '@/components/Category/ExtractCategory';
+import { X } from 'lucide-react';
 
 export default function Category() {
   const { loading, category } = useSelector((state) => state.category);
@@ -22,11 +30,19 @@ export default function Category() {
   }, [loading, dispatch]);
 
   const renderCategories = (category) => (
-    <ul>
+    <ul className='list-group list-group-flush ms-2'>
       {category.map((cat) => (
-        <li key={cat.id}>
-          {cat.name}
-          {cat.children?.length > 0 && renderCategories(cat.children)}
+        <li
+          key={cat.id}
+          className='list-group-item border-0 ps-3 py-1 d-flex flex-column'
+        >
+          <div className='fw-semibold text-dark'>{cat.name}</div>
+
+          {cat.children?.length > 0 && (
+            <div className='ms-3 mt-1 border-start ps-2'>
+              {renderCategories(cat.children)}
+            </div>
+          )}
         </li>
       ))}
     </ul>
@@ -40,7 +56,15 @@ export default function Category() {
   }
 
   function handleCategoryImage(e) {
-    setCategoryImage(e.target.files[0]);
+    const file = e.target.files[0];
+    if (file) {
+      const newImage = {
+        file,
+        preview: URL.createObjectURL(file),
+        name: file.name,
+      };
+      setCategoryImage(newImage);
+    }
   }
 
   async function createCategory(e) {
@@ -53,7 +77,7 @@ export default function Category() {
     const form = new FormData();
     form.append('name', categoryName);
     if (parentId) form.append('parentId', parentId);
-    if (categoryImage) form.append('image', categoryImage);
+    if (categoryImage?.file) form.append('image', categoryImage.file);
 
     const res = await axiosInstance.post('/category/create', form);
     console.log(res.data);
@@ -62,6 +86,14 @@ export default function Category() {
       dispatch(getCategories());
     }
   }
+
+  const handleRemoveImage = () => {
+    if (categoryImage?.preview) {
+      // Revoke object URL to prevent memory leak
+      URL.revokeObjectURL(categoryImage.preview);
+    }
+    setCategoryImage(undefined);
+  };
 
   if (loading === 'pending') {
     return <div>Loading....</div>;
@@ -78,42 +110,80 @@ export default function Category() {
             </Button>
           </div>
 
-          <Modal show={show} onHide={handleClose}>
+          <Modal show={show} onHide={handleClose} centered>
             <Modal.Header closeButton>
               <Modal.Title>Add a new category:</Modal.Title>
             </Modal.Header>
 
             <Form onSubmit={createCategory}>
               <Modal.Body>
-                <Input
-                  type='text'
-                  placeholder='Category Name'
-                  value={categoryName}
-                  onChange={(e) => {
-                    setCategoryName(e.target.value);
-                  }}
-                />
+                <Form.Group className='mb-3'>
+                  <Form.Label className='mt-1 fw-semibold'>Name</Form.Label>
+                  <Form.Control
+                    type='text'
+                    placeholder='Enter category name'
+                    value={categoryName}
+                    onChange={(e) => {
+                      setCategoryName(e.target.value);
+                    }}
+                  />
+                </Form.Group>
 
                 {/* Select parent ID for new  category */}
-                <Form.Select
-                  name='parentId'
-                  className='form-control'
-                  value={parentId}
-                  onChange={(e) => setParentId(e.target.value)}
-                >
-                  <CategoryOptions />
-                </Form.Select>
+                <Form.Group>
+                  <Form.Label className='mt-1 fw-semibold'>
+                    Parent Category
+                  </Form.Label>
+                  <Form.Select
+                    name='parentId'
+                    className='form-control'
+                    value={parentId}
+                    onChange={(e) => setParentId(e.target.value)}
+                  >
+                    <CategoryOptions />
+                  </Form.Select>
+                </Form.Group>
 
-                <Form.Label htmlFor='categoryImage' className='my-2'>
-                  Category Image
-                </Form.Label>
-                <br />
-                <Form.Control
-                  type='file'
-                  name='categoryImage'
-                  id='categoryImage'
-                  onChange={handleCategoryImage}
-                />
+                <Form.Group>
+                  <Form.Label className='mt-1 fw-semibold'>
+                    Category Image
+                  </Form.Label>
+                  <br />
+                  <Form.Control
+                    type='file'
+                    name='categoryImage'
+                    onChange={handleCategoryImage}
+                  />
+                </Form.Group>
+
+                {/* Image preview */}
+                {categoryImage?.preview && (
+                  <Container
+                    className='d-flex-column border mt-2'
+                    style={{ width: '140px' }}
+                  >
+                    <div className='position-relative rounded image-wrapper'>
+                      <Image
+                        src={categoryImage.preview}
+                        alt={categoryImage.name}
+                        fluid
+                      />
+                      <Button
+                        variant='danger'
+                        size='sm'
+                        className='remove-btn position-absolute top-0 end-0 py-0 rounded-circle'
+                        onClick={handleRemoveImage}
+                      >
+                        <X size={14} />
+                      </Button>
+                    </div>
+                    <div className='text-truncate small mt-1'>
+                      {categoryImage.name?.length <= 18
+                        ? categoryImage.name
+                        : `${categoryImage.name.slice(0, 15)}...`}
+                    </div>
+                  </Container>
+                )}
               </Modal.Body>
 
               <Modal.Footer>
@@ -121,7 +191,7 @@ export default function Category() {
                   Cancel
                 </Button>
                 <Button type='submit' variant='primary'>
-                  Add
+                  Save Changes
                 </Button>
               </Modal.Footer>
             </Form>
@@ -129,8 +199,14 @@ export default function Category() {
         </Col>
       </Row>
 
-      <h5>List of added categories:</h5>
-      <ul>{renderCategories(category)}</ul>
+      <Container className='mt-3'>
+        <h5 className='mb-3'>List of added categories:</h5>
+        {category.length > 0 ? (
+          renderCategories(category)
+        ) : (
+          <p className='text-muted'>No categories found.</p>
+        )}
+      </Container>
     </Layout>
   );
 }
