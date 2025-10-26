@@ -11,14 +11,20 @@ export default function Header() {
   const dispatch = useDispatch();
 
   return (
-    <Navbar collapseOnSelect expand="lg" variant="dark" bg="dark">
+    <Navbar
+      collapseOnSelect
+      expand='lg'
+      variant='dark'
+      bg='dark'
+      className='position-sticky top-0'
+    >
       <Container>
-        <Link className="navbar-brand" to="/">
+        <Link className='navbar-brand' to='/'>
           ClickHaat
         </Link>
-        <Navbar.Toggle aria-controls="responsive-navbar-nav" />
-        <Navbar.Collapse id="responsive-navbar-nav">
-          <Nav className="me-auto">
+        <Navbar.Toggle aria-controls='responsive-navbar-nav' />
+        <Navbar.Collapse id='responsive-navbar-nav'>
+          <Nav className='me-auto'>
             {/* <NavDropdown title="Dropdown" id="collapsible-nav-dropdown">
               <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
               <NavDropdown.Item href="#action/3.2">
@@ -33,18 +39,18 @@ export default function Header() {
           </Nav>
           <Nav>
             {isUserLoggedIn ? (
-              <li className="nav-item">
-                <Button variant="dark" onClick={() => dispatch(logout())}>
+              <li className='nav-item'>
+                <Button variant='dark' onClick={() => dispatch(logout())}>
                   Signout
                 </Button>
               </li>
             ) : (
               <>
-                <NavLink to="/signin" className="nav-link">
+                <NavLink to='/signin' className='nav-link'>
                   Signin
                 </NavLink>
-                <li className="nav-item">
-                  <NavLink to="/signup" className="nav-link">
+                <li className='nav-item'>
+                  <NavLink to='/signup' className='nav-link'>
                     Signup
                   </NavLink>
                 </li>
