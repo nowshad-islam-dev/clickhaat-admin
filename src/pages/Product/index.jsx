@@ -16,6 +16,7 @@ import { createProduct } from '@/app/store/productSlice';
 import { useDispatch } from 'react-redux';
 import { X } from 'lucide-react';
 import './style.css';
+import { useEffect } from 'react';
 
 export default function Product() {
   const dispatch = useDispatch();
@@ -63,6 +64,15 @@ export default function Product() {
       return prev.filter((_, i) => i !== idx);
     });
   };
+
+  useEffect(() => {
+    return () => {
+      productImages.forEach((img) => {
+        // Revoke object URL to prevent memory leak
+        if (img.preview) URL.revokeObjectURL(img.preview);
+      });
+    };
+  }, [productImages]);
 
   async function handleCreateProduct(e) {
     e.preventDefault();
@@ -226,7 +236,7 @@ export default function Product() {
                                 className='remove-btn position-absolute top-0 end-0 py-0 rounded-circle'
                                 onClick={() => handleRemoveImage(idx)}
                               >
-                                {X}
+                                <X size={14} />
                               </Button>
                             </div>
                             <div className='text-truncate small mt-1'>
