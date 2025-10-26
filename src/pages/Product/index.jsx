@@ -11,12 +11,14 @@ import {
 } from 'react-bootstrap';
 import Layout from '@/components/Layout';
 import CategoryOptions from '@/components/Category/ExtractCategory';
-import axiosInstance from '@/axios/axiosInstance';
 import ProductTable from '@/components/Product/ProductTable';
+import { createProduct } from '@/app/store/productSlice';
+import { useDispatch } from 'react-redux';
 import { X } from 'lucide-react';
 import './style.css';
 
 export default function Product() {
+  const dispatch = useDispatch();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [categoryId, setCategoryId] = useState('');
@@ -62,7 +64,7 @@ export default function Product() {
     });
   };
 
-  async function createProduct(e) {
+  async function handleCreateProduct(e) {
     e.preventDefault();
 
     if (!name.trim() || !description.trim() || !categoryId) {
@@ -81,11 +83,8 @@ export default function Product() {
       form.append('picture', imgObj.file);
     });
 
-    const res = await axiosInstance.post('/product/create', form);
-    if (res.status === 201) {
-      handleClose();
-    }
-    console.log(res.data);
+    dispatch(createProduct(form));
+    handleClose();
   }
 
   return (
@@ -104,7 +103,7 @@ export default function Product() {
               <Modal.Title>Add New Product</Modal.Title>
             </Modal.Header>
 
-            <Form onSubmit={createProduct} encType='multipart/form-data'>
+            <Form onSubmit={handleCreateProduct} encType='multipart/form-data'>
               <Modal.Body>
                 <Form.Group className='mb-3'>
                   <Form.Label className='fw-semibold'>Name</Form.Label>
