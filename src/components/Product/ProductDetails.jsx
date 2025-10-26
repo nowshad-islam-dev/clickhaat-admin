@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 import {
   Modal,
   Form,
@@ -9,14 +10,17 @@ import {
   InputGroup,
 } from 'react-bootstrap';
 import CategoryOptions from '../Category/ExtractCategory';
+import { updateProduct } from '@/app/store/productSlice';
 
 export default function ProductDetails({ product, mode, show, onClose }) {
+  const dispatch = useDispatch();
+
   const [formData, setFormData] = useState({
     name: product.name || '',
     price: product.price || '0',
     description: product.description || '',
     quantity: product.quantity || '0',
-    category: product.category?.id || '',
+    category: product.category?._id || '',
     offer: product.offer || '0',
   });
 
@@ -26,7 +30,7 @@ export default function ProductDetails({ product, mode, show, onClose }) {
       price: product.price || '0',
       description: product.description || '',
       quantity: product.quantity || '0',
-      category: product.category?.id || '',
+      category: product.category?._id || '',
       offer: product.offer || '0',
     });
   }, [product]);
@@ -40,7 +44,9 @@ export default function ProductDetails({ product, mode, show, onClose }) {
   };
 
   const handleSave = () => {
-    console.log(formData);
+    dispatch(
+      updateProduct({ productId: product._id, updatedProductData: formData })
+    );
     onClose();
   };
 
