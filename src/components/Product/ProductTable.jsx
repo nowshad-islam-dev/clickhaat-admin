@@ -1,21 +1,24 @@
 import { useState, useEffect } from 'react';
 import { Table, Container, Pagination } from 'react-bootstrap';
 import { useSelector, useDispatch } from 'react-redux';
-import { SquarePen, Eye } from 'lucide-react';
-import { getProducts } from '@/app/store/productSlice';
+import { SquarePen, Eye, Trash } from 'lucide-react';
+import {
+  productSelectors,
+  getProducts,
+  deleteProduct,
+  setPagination,
+} from '@/app/store/productSlice';
 import ProductDetails from './ProductDetails';
 
 export default function ProductTable() {
   const dispatch = useDispatch();
-  const { loading, ids, entities } = useSelector((state) => state.product);
-  const { page, limit, total } = useSelector(
-    (state) => state.product.pagination
-  );
-
+  const products = useSelector(productSelectors.selectAll);
+  const { loading, error, pagination } = useSelector((state) => state.product);
+  const { total, page: currentPage, limit } = pagination;
   const [showProductDetail, setShowProductDetail] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [modalMode, setModalMode] = useState('view'); // view or edit
-  const [currentPage, setCurrentPage] = useState(page || 1);
+  // const [currentPage, setCurrentPage] = useState(page || 1);
   const totalPage = total > 0 ? Math.ceil(total / limit) : 0;
 
   // Fetch new products if currentPage changes
@@ -25,15 +28,19 @@ export default function ProductTable() {
 
   const handleClick = (pageNum) => {
     if (pageNum === currentPage) return; // Avoid duplicate request
-    setCurrentPage(pageNum);
+    dispatch(setPagination({ page: pageNum }));
   };
 
   const handlePrev = () => {
-    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
+    if (currentPage > 1) {
+      dispatch(setPagination({ page: currentPage - 1 }));
+    }
   };
 
   const handleNext = () => {
-    if (currentPage < totalPage) setCurrentPage((prev) => prev + 1);
+    if (currentPage < totalPage) {
+      dispatch(setPagination({ page: currentPage + 1 }));
+    }
   };
 
   const handleOpenModal = (product, mode) => {
@@ -48,6 +55,14 @@ export default function ProductTable() {
     setModalMode('view');
   };
 
+  const handleDelete = (productId) => {
+    const isConfirmed = window.confirm(
+      'Do you really want to delete this product?'
+    );
+    if (!isConfirmed) return;
+    dispatch(deleteProduct(productId));
+  };
+
   if (loading === 'pending') return <div>Loading....</div>;
 
   return (
@@ -60,14 +75,13 @@ export default function ProductTable() {
             <th>Quantity</th>
             <th>Category</th>
             <th>Offer</th>
-            <th>View/Edit</th>
+            <th>View/Edit/Delete</th>
           </tr>
         </thead>
         <tbody>
-          {ids.map((id) => {
-            const p = entities[id];
+          {products.map((p) => {
             return (
-              <tr key={id}>
+              <tr key={p._id}>
                 <td>{p.name}</td>
                 <td>{p.price}</td>
                 <td>{p.quantity}</td>
@@ -87,6 +101,13 @@ export default function ProductTable() {
                     className='mx-2'
                     role='button'
                     onClick={() => handleOpenModal(p, 'view')}
+                  />
+                  <Trash
+                    size={18}
+                    color='#555'
+                    className='mx-2'
+                    role='button'
+                    onClick={() => handleDelete(p._id)}
                   />
                 </td>
               </tr>
