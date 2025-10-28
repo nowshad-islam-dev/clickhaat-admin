@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosInstance from '@/axios/axiosInstance';
+import { logout } from '../authSlice';
 
 // loading --->>> 'idle' | 'pending' | 'succeeded' | 'failed'
 
@@ -24,6 +25,9 @@ const categorySlice = createSlice({
 
   extraReducers: (builder) => {
     builder
+      .addCase(logout, () => {
+        return initialState;
+      })
       .addCase(getCategories.pending, (state) => {
         state.loading = 'pending';
       })

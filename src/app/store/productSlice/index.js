@@ -4,6 +4,7 @@ import {
   createAsyncThunk,
   createEntityAdapter,
 } from '@reduxjs/toolkit';
+import { logout } from '../authSlice';
 
 // loading --->>> 'idle' | 'pending' | 'succeeded' | 'failed'
 
@@ -15,7 +16,7 @@ const productsAdapter = createEntityAdapter({
 const initialState = productsAdapter.getInitialState({
   loading: 'idle',
   error: '',
-  pagination: { page: 1, limit: 20, total: 0 },
+  pagination: { page: 1, limit: 5, total: 0 },
   filters: { category: '', search: '', sort: 'price_asc' },
 });
 
@@ -94,6 +95,9 @@ const productSlice = createSlice({
 
   extraReducers: (builder) => {
     builder
+      .addCase(logout, () => {
+        return initialState;
+      })
       .addCase(getProducts.pending, (state) => {
         state.loading = 'pending';
       })
