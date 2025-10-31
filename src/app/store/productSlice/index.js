@@ -98,9 +98,6 @@ const productSlice = createSlice({
       .addCase(logout, () => {
         return initialState;
       })
-      .addCase(getProducts.pending, (state) => {
-        state.loading = 'pending';
-      })
       .addCase(getProducts.fulfilled, (state, action) => {
         // Safe destructuring with default value
         const { products = [], total = 0 } = action.payload || {};
