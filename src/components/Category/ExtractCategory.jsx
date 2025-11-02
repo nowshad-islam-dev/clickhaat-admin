@@ -4,7 +4,7 @@ import { getCategories } from '@/app/store/categorySlice';
 
 export const extractCategories = (category, result = []) => {
   for (let cat of category) {
-    result.push({ id: cat.id, name: cat.name });
+    result.push({ _id: cat._id, name: cat.name });
     if (cat.children?.length > 0) {
       extractCategories(cat.children, result);
     }
@@ -33,7 +33,7 @@ export default function CategoryOptions() {
         Select parent category
       </option>
       {categoryOptions.map((cat) => (
-        <option key={cat.id} value={cat.id}>
+        <option key={cat._id} value={cat._id}>
           {cat.name}
         </option>
       ))}
