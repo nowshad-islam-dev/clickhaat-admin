@@ -1,0 +1,32 @@
+.category-action-button {
+  display: none;
+  margin-left: 8px;
+  transition: transform 0.2s ease-out;
+  cursor: pointer;
+}
+
+.category-action-button:hover {
+  transform: scale(1.4);
+}
+
+.category-name-container {
+  width: fit-content;
+  padding: 4px;
+  cursor: pointer;
+  border: 2.5px solid transparent;
+  border-radius: 10px;
+  transition: border-color 0.2s ease-out;
+}
+
+.category-name-container:hover {
+  border-color: #555;
+}
+
+.category-name-container:hover .category-action-button {
+  display: inline;
+}
+
+.category-name-container:focus-within {
+  outline: none;
+  border-color: #555;
+}
