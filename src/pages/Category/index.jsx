@@ -36,7 +36,7 @@ export default function Category() {
               className='me-2 text-muted category-action-button'
               role='button'
               title='Delete'
-              onClick={() => handleDelete(cat.id)}
+              onClick={() => handleDelete(cat._id)}
             />
 
             <SquarePen

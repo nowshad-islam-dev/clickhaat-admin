@@ -10,6 +10,22 @@ const initialState = {
   error: '',
 };
 
+export const getCategories = createAsyncThunk(
+  'category/getCategories',
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get('/category/all');
+      return res.data;
+
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.error || 'Failed to fetch categories.'
+      );
+    }
+  }
+);
+
+
 export const createCategory = createAsyncThunk(
   'category/createCategory',
   async (form, { rejectWithValue, dispatch }) => {
@@ -26,19 +42,7 @@ export const createCategory = createAsyncThunk(
   }
 );
 
-export const getCategories = createAsyncThunk(
-  'category/getCategories',
-  async (_, { rejectWithValue }) => {
-    try {
-      const res = await axiosInstance.get('/category/all');
-      return res.data.categoryList;
-    } catch (err) {
-      return rejectWithValue(
-        err.response?.data?.error || 'Failed to fetch categories.'
-      );
-    }
-  }
-);
+
 
 export const updateCategory = createAsyncThunk(
   'category/updateCategory',
@@ -89,7 +93,8 @@ const categorySlice = createSlice({
         return initialState;
       })
       .addCase(getCategories.fulfilled, (state, action) => {
-        state.category = action.payload || [];
+        const {data} = action.payload
+        state.category = data || [];
       })
       .addCase(getCategories.rejected, (state, action) => {
         state.category = [];

@@ -100,7 +100,7 @@ const productSlice = createSlice({
       })
       .addCase(getProducts.fulfilled, (state, action) => {
         // Safe destructuring with default value
-        const { products = [], total = 0 } = action.payload || {};
+        const { products = [], total = 0 } = action.payload.data || {};
 
         productsAdapter.setAll(state, products);
         state.pagination.total = total;

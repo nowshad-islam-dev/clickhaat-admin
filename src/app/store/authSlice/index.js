@@ -37,7 +37,7 @@ const authSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(loginUserWithCredentials.fulfilled, (state, action) => {
-        const { token, user } = action.payload;
+        const { token, user } = action.payload.data;
         localStorage.setItem('click_haat_token', token);
         // Either mutate existing state or return new state
         // to replace old state
